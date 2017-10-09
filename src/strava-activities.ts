@@ -14,7 +14,7 @@ export class StravaActivities {
     http.configure(config => {
       config
         .useStandardConfiguration()
-        .withBaseUrl("http://activities.web/api/")
+        .withBaseUrl("http://activities-api.azurewebsites.net/api/")
     });
   }
 
