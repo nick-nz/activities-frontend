@@ -3,7 +3,7 @@ import * as L from 'leaflet';
 import 'https://gist.githubusercontent.com/nick-aranz/cf48b66818e0c225fbf9369483551af8/raw/7bd909667767d38006d2d08be51669b8094e5769/Polyline.encoded.js';
 import { HttpClient, json } from 'aurelia-fetch-client';
 import 'fetch';
-import { Constants } from "src/constants";
+import { Constants } from 'src/constants';
 
 @autoinject
 export class StravaActivities {
@@ -14,7 +14,7 @@ export class StravaActivities {
     http.configure(config => {
       config
         .useStandardConfiguration()
-        .withBaseUrl("http://activities-api.azurewebsites.net/api/")
+        .withBaseUrl('http://activities-api.azurewebsites.net/api/')
     });
   }
 
@@ -45,10 +45,8 @@ export class StravaActivities {
     const LxPolyline = L.Polyline as any as Lx.Polyline;
 
     for (let encoded of this.polylines) {
-      console.log(encoded);
-      var polyline = LxPolyline.fromEncoded(encoded);
-      console.log(polyline);
-      var coordinates = polyline.getLatLngs();
+      let polyline = LxPolyline.fromEncoded(encoded);
+      let coordinates = polyline.getLatLngs();
 
       L.polyline(
         coordinates,
