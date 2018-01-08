@@ -4,12 +4,9 @@ export class App {
   public router: Router;
 
   public configureRouter(config: RouterConfiguration, router: Router) {
-    config.title = 'Aurelia';
+    config.title = 'Funemployment';
     config.map([
-      { route: ['', 'welcome'], name: 'welcome',      moduleId: 'welcome',      nav: true, title: 'Welcome' },
-      { route: 'users',         name: 'users',        moduleId: 'users',        nav: true, title: 'Github Users' },
-      { route: 'child-router', name: 'child-router', moduleId: 'child-router', nav: true, title: 'Child Router' },
-      { route: 'strava-activities', name: 'strava-activities', moduleId: 'strava-activities', nav: true, title: 'Nick\'s Strava Activities' }
+      { route: '', name: 'strava-activities', moduleId: 'strava-activities', nav: true, title: 'Activities' }
     ]);
 
     this.router = router;

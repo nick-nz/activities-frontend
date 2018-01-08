@@ -5,7 +5,8 @@ module.exports = {
         "[**/*.js]",
         "**/*.html!text",
         "**/*.css!text",
-        "leaflet"
+        "leaflet",
+        "papaparse"
       ],
       "options": {
         "inject": true,

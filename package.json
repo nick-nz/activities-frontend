@@ -82,11 +82,14 @@
       "font-awesome": "npm:font-awesome@4.6.3",
       "jquery": "npm:jquery@^2.2.4",
       "leaflet": "github:Leaflet/Leaflet@0.7.7",
+      "papaparse": "npm:papaparse@^4.3.6",
       "text": "github:systemjs/plugin-text@^0.0.8"
     },
     "devDependencies": {}
   },
   "dependencies": {
-    "@types/leaflet": "^1.2.0"
+    "@types/leaflet": "^1.2.0",
+    "@types/papaparse": "^4.1.33",
+    "papaparse": "^4.3.6"
   }
 }
