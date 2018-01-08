@@ -20,8 +20,10 @@ export class StravaActivities {
     let bounds = L.latLngBounds(corner1, corner2);
     this.map = L.map('map').setView([-43, 170], 6).setMaxBounds(bounds);
 
-    L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
       attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
+      id: 'mapbox.outdoors',
+      accessToken: 'pk.eyJ1IjoibndhcmVpbmciLCJhIjoiY2ozbnNyZ3N5MDAzZTMybGd3bTl2ZnZrYiJ9.xwQ9Y424hzaHcMpmezVSAw',
       maxZoom: 18,
       minZoom: 6
     }).addTo(this.map);
