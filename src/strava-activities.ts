@@ -2,13 +2,13 @@
 import * as L from 'leaflet';
 import 'https://gist.githubusercontent.com/nick-aranz/cf48b66818e0c225fbf9369483551af8/raw/7bd909667767d38006d2d08be51669b8094e5769/Polyline.encoded.js';
 import 'fetch';
-import * as Papa from 'papaparse'
+import * as Papa from 'papaparse';
 
 @autoinject
 export class StravaActivities {
   private map: L.Map;
-  private polylines: string[];
-  private activityData;
+  private activityData: any[];
+  private docTracks: any[];
 
   constructor() {}
 
@@ -28,13 +28,62 @@ export class StravaActivities {
       minZoom: 6
     }).addTo(this.map);
 
+    this.parseStravaActivities();
+    this.parseDocActivities();
+  }
+
+  private parseDocActivities() {
+    Papa.parse('https://funemployment.blob.core.windows.net/data/my-doc-tracks.csv',
+    { download: true,
+      skipEmptyLines: true,
+      header: true,
+      complete: (results, file) => {
+        this.docTracks = results.data;
+        this.addDocTracksToMap();
+      }
+    });
+  }
+
+  private addDocTracksToMap() {
+    let docTracksLayer = L.geoJson().addTo(this.map);
+
+    this.docTracks.forEach(track => {
+      let linestring: string = track.linestring;
+      if (linestring.charAt(0) === 'M') {
+        return;
+      } else {
+        let pointstring = linestring.match(/\(([^)]+)\)/)[1];
+        let points = pointstring.split(',');
+
+        let coordinates = [];
+        for (let point of points) {
+          let latlong = point.split(' ');
+          let long = parseFloat(latlong[1]);
+          let lat = parseFloat(latlong[0]);
+          coordinates.push([lat, long]);
+        }
+
+        let feature = {
+          "type": "Feature",
+          "properties": {
+            "name": track.name
+          },
+          "geometry": {
+            "type": "LineString",
+            "coordinates": coordinates
+          }
+        };
+        docTracksLayer.addData(feature);
+      }
+    });
+  }
+
+  private parseStravaActivities() {
     Papa.parse('https://funemployment.blob.core.windows.net/data/mytrip.csv',
     { download: true,
       skipEmptyLines: true,
       header: true,
-      complete: (results, file) =>
-      {
-        console.log('Parsing complete');
+      complete: (results, file) => {
         this.activityData = results.data;
         this.addPolylinesToMap();
       }
@@ -69,7 +118,7 @@ export class StravaActivities {
       L.polyline(
         coordinates,
         {
-          color: activity.type === 'Ride' ? 'blue' : 'red',
+          color: activity.type === 'Ride' ? 'green' : 'red',
           weight: 4,
           opacity: .7,
           lineJoin: 'round'
