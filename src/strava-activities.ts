@@ -51,10 +51,11 @@ export class StravaActivities {
       let linestring: string = track.linestring;
       if (linestring.charAt(0) === 'M') {
         let linestrings = this.getLineStringsFromMultilineString(linestring);
+        let i = 1;
         linestrings.forEach(pointstring => {
           let coordinates = this.getCoordinatesFromLineString(pointstring);
-          console.log('adding' + track.name);
-          docTracksLayer.addData(this.buildFeature(track.name, coordinates));
+          docTracksLayer.addData(this.buildFeature(track.name + i, coordinates));
+          i++;
         });
       } else {
         let pointstring = linestring.match(/\(([^)]+)\)/)[1];
@@ -79,12 +80,8 @@ export class StravaActivities {
   }
 
   private getLineStringsFromMultilineString(multiline: string): Array<string> {
-    let linestrings = [];
-    let matches = multiline.match(/\((([^)]+))\)/);
-    matches.forEach(match => {
-      linestrings.push(match.replace(/\(|\)/g, ''));
-    });
-    return linestrings;
+    let inner = multiline.match(/\(\((.+?)\)\)/)[1];
+    return inner.split('),(');
   }
 
   private getCoordinatesFromLineString(line: string): Array<Array<number>> {
@@ -113,11 +110,11 @@ export class StravaActivities {
 
   private createPopup(activity): HTMLElement {
     let popup = L.DomUtil.create('div', 'map-popup');
-    let title = L.DomUtil.create('p', 'actitity-title', popup);
+    let title = L.DomUtil.create('h3', 'actitity-title', popup);
     (<HTMLParagraphElement>title).innerText = activity.name;
     let detail = L.DomUtil.create('p', 'actitity-detail', popup);
     (<HTMLParagraphElement>detail).innerHTML = `<b>Distance:</b> ${(activity.distance / 1000).toFixed(1)}km`;
-    (<HTMLParagraphElement>detail).innerHTML += `<br /><b>Moving Time:</b> ${activity.moving_time}`;
+    (<HTMLParagraphElement>detail).innerHTML += `<br /><b>Moving Time:</b> ${this.secondsToHms(activity.moving_time)}`;
     (<HTMLParagraphElement>detail).innerHTML += `<br /><b>Elevation Gain:</b> ${activity.total_elevation_gain}m`;
     let img = L.DomUtil.create('img', 'my-img', popup);
     (<HTMLImageElement>img).src = `https://funemployment.blob.core.windows.net/data/imgs/${activity.id}.jpg`;
@@ -127,6 +124,18 @@ export class StravaActivities {
 
   private imageError(this: HTMLElement, ev: ErrorEvent) {
     (<HTMLImageElement>this).src = '';
+  }
+
+  secondsToHms(d) {
+    d = Number(d);
+    var h = Math.floor(d / 3600);
+    var m = Math.floor(d % 3600 / 60);
+    var s = Math.floor(d % 3600 % 60);
+
+    var hDisplay = h > 0 ? h + "h " : "";
+    var mDisplay = m > 0 ? m + "m " : "";
+    var sDisplay = s > 0 ? s + "s" : "";
+    return hDisplay + mDisplay + sDisplay; 
   }
 
   private addPolylinesToMap() {
