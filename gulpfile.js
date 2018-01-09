@@ -1,3 +1,5 @@
+process.env.DISABLE_NOTIFIER = true;
+
 var gulp = require('gulp');
 
 // all gulp tasks are located in the ./build/tasks directory

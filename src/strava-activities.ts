@@ -50,32 +50,53 @@ export class StravaActivities {
     this.docTracks.forEach(track => {
       let linestring: string = track.linestring;
       if (linestring.charAt(0) === 'M') {
-        return;
+        let linestrings = this.getLineStringsFromMultilineString(linestring);
+        linestrings.forEach(pointstring => {
+          let coordinates = this.getCoordinatesFromLineString(pointstring);
+          console.log('adding' + track.name);
+          docTracksLayer.addData(this.buildFeature(track.name, coordinates));
+        });
       } else {
         let pointstring = linestring.match(/\(([^)]+)\)/)[1];
-        let points = pointstring.split(',');
-
-        let coordinates = [];
-        for (let point of points) {
-          let latlong = point.split(' ');
-          let long = parseFloat(latlong[1]);
-          let lat = parseFloat(latlong[0]);
-          coordinates.push([lat, long]);
-        }
-
-        let feature = {
-          "type": "Feature",
-          "properties": {
-            "name": track.name
-          },
-          "geometry": {
-            "type": "LineString",
-            "coordinates": coordinates
-          }
-        };
-        docTracksLayer.addData(feature);
+        let coordinates = this.getCoordinatesFromLineString(pointstring);
+        docTracksLayer.addData(this.buildFeature(track.name, coordinates));
       }
     });
+  }
+
+  private buildFeature(name: string, coordinates: Array<Array<number>>)
+  {
+    return {
+      "type": "Feature",
+      "properties": {
+        "name": name
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": coordinates
+      }
+    };
+  }
+
+  private getLineStringsFromMultilineString(multiline: string): Array<string> {
+    let linestrings = [];
+    let matches = multiline.match(/\((([^)]+))\)/);
+    matches.forEach(match => {
+      linestrings.push(match.replace(/\(|\)/g, ''));
+    });
+    return linestrings;
+  }
+
+  private getCoordinatesFromLineString(line: string): Array<Array<number>> {
+    let coordinates = []
+    let points = line.split(',');
+    for (let point of points) {
+      let latlong = point.split(' ');
+      let long = parseFloat(latlong[1]);
+      let lat = parseFloat(latlong[0]);
+      coordinates.push([lat, long]);
+    }
+    return coordinates;
   }
 
   private parseStravaActivities() {
