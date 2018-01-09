@@ -45,22 +45,32 @@ export class StravaActivities {
   }
 
   private addDocTracksToMap() {
-    let docTracksLayer = L.geoJson().addTo(this.map);
+    let docTracksLayer: L.GeoJSON;
 
     this.docTracks.forEach(track => {
+      let order = track.order.split('/');
+      if (order[0] === '1') {
+        docTracksLayer = L.geoJson().addTo(this.map);
+      }
       let linestring: string = track.linestring;
       if (linestring.charAt(0) === 'M') {
         let linestrings = this.getLineStringsFromMultilineString(linestring);
-        let i = 1;
         linestrings.forEach(pointstring => {
           let coordinates = this.getCoordinatesFromLineString(pointstring);
-          docTracksLayer.addData(this.buildFeature(track.name + i, coordinates));
-          i++;
+          docTracksLayer.addData(this.buildFeature(track.name, coordinates));
         });
       } else {
         let pointstring = linestring.match(/\(([^)]+)\)/)[1];
         let coordinates = this.getCoordinatesFromLineString(pointstring);
         docTracksLayer.addData(this.buildFeature(track.name, coordinates));
+      }
+      if (order[0] === order[1]) {
+        docTracksLayer.bindPopup(this.createTrackPopup(track.tripname, track.tripid));
+        docTracksLayer.setStyle(function(feature) {
+          return { color: 'blue',
+            weight: 5,
+            opacity: .7 };
+        });
       }
     });
   }
@@ -108,7 +118,16 @@ export class StravaActivities {
     });
   }
 
-  private createPopup(activity): HTMLElement {
+  private createTrackPopup(name: string, tripid: string): HTMLElement {
+    let popup = L.DomUtil.create('div', 'map-popup');
+    let title = L.DomUtil.create('h3', 'actitity-title', popup);
+    (<HTMLParagraphElement>title).innerText = name;
+    let img = L.DomUtil.create('img', 'my-img', popup);
+    (<HTMLImageElement>img).src = `https://funemployment.blob.core.windows.net/data/imgs/${tripid}.jpg`;
+    return popup;
+  }
+
+  private createStravaPopup(activity): HTMLElement {
     let popup = L.DomUtil.create('div', 'map-popup');
     let title = L.DomUtil.create('h3', 'actitity-title', popup);
     (<HTMLParagraphElement>title).innerText = activity.name;
@@ -118,12 +137,7 @@ export class StravaActivities {
     (<HTMLParagraphElement>detail).innerHTML += `<br /><b>Elevation Gain:</b> ${activity.total_elevation_gain}m`;
     let img = L.DomUtil.create('img', 'my-img', popup);
     (<HTMLImageElement>img).src = `https://funemployment.blob.core.windows.net/data/imgs/${activity.id}.jpg`;
-    img.onerror = this.imageError;
     return popup;
-  }
-
-  private imageError(this: HTMLElement, ev: ErrorEvent) {
-    (<HTMLImageElement>this).src = '';
   }
 
   secondsToHms(d) {
@@ -145,16 +159,27 @@ export class StravaActivities {
       let polyline = LxPolyline.fromEncoded(activity.polyline);
       let coordinates = polyline.getLatLngs();
 
+      let color: string;
+      switch (activity.type) {
+        case 'Run':
+         color = 'red';
+         break;
+        case 'Ride':
+          color = 'green';
+          break;
+        default:
+          color = 'blue';
+      }
+
       L.polyline(
         coordinates,
         {
-          color: activity.type === 'Ride' ? 'green' : 'red',
-          weight: 4,
-          opacity: .7,
-          lineJoin: 'round'
+          color: color,
+          weight: 5,
+          opacity: .7
         }
       )
-      .bindPopup(this.createPopup(activity))
+      .bindPopup(this.createStravaPopup(activity), {autoPanPaddingTopLeft: L.point(0, 25)})
       .addTo(this.map);
     }
   }
