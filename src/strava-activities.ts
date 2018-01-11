@@ -68,7 +68,7 @@ export class StravaActivities {
         docTracksLayer.bindPopup(this.createTrackPopup(track.tripname, track.tripid));
         docTracksLayer.setStyle(function(feature) {
           return { color: 'blue',
-            weight: 5,
+            weight: 8,
             opacity: .7 };
         });
       }
@@ -175,7 +175,7 @@ export class StravaActivities {
         coordinates,
         {
           color: color,
-          weight: 5,
+          weight: 8,
           opacity: .7
         }
       )
